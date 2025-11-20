@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fast Browser Performance Benchmark (Dark Mode)</title>
+    <title>WarpCore Benchmark: 3-Stage Benchmark (CPU, MEM, GPU)</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -30,6 +30,9 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
+                    colors: {
+                        'mem-color': '#f97316', /* Orange */
+                    }
                 }
             }
         }
@@ -37,12 +40,12 @@
 </head>
 <body class="bg-gray-900 min-h-screen flex items-center justify-center p-4 text-gray-200">
 
-    <div id="app-container" class="w-full max-w-2xl bg-gray-800 shadow-2xl rounded-xl p-8 transition-all duration-300">
+    <div id="app-container" class="w-full max-w-3xl bg-gray-800 shadow-2xl rounded-xl p-8 transition-all duration-300">
 
         <!-- Header -->
         <header class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-indigo-400">WarpCore Benchmark</h1>
-            <p class="text-gray-400 mt-2">Optimized for quick, non-blocking CPU and GPU stress testing.</p>
+            <h1 class="text-3xl font-extrabold text-indigo-400">🚀 WarpCore  Benchmark</h1>
+            <p class="text-gray-400 mt-2">3-Stage Stress Test: CPU Recursion, Memory Thrashing, and WebGL Fractals.</p>
         </header>
 
         <!-- Main Content Area -->
@@ -50,13 +53,13 @@
             
             <!-- Initial State / Ready to Start -->
             <div id="start-screen" class="text-center">
-                <div class="text-6xl text-indigo-400 mb-6">🚀</div>
-                <h2 class="text-2xl font-semibold mb-4 text-white">Ready to Test?</h2>
+                <div class="text-6xl text-indigo-400 mb-6">⚙️</div>
+                <h2 class="text-2xl font-semibold mb-4 text-white">Ready to Initialize?</h2>
                 <p class="text-gray-400 mb-8">
-                    This test is designed to run quickly using a dedicated background thread for the CPU test.
+                    This version includes a dedicated **Memory Thrashing Test** to evaluate your RAM performance and capacity.
                 </p>
                 <button id="startButton" class="w-full md:w-auto px-10 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-500 transition duration-150 transform hover:scale-105" onclick="startBenchmark()">
-                    Start Benchmark
+                    Start WarpCore
                 </button>
             </div>
 
@@ -80,25 +83,33 @@
                 <div class="relative p-6 mb-8">
                     <div class="absolute inset-0 flex items-center justify-center">
                         <!-- Background Pulse Animation -->
-                        <div class="w-24 h-24 bg-green-200 rounded-full animate-pulse-ring"></div>
+                        <div class="w-28 h-28 bg-green-200 rounded-full animate-pulse-ring"></div>
                     </div>
                     <!-- Final Score Display -->
-                    <div class="relative w-48 h-48 mx-auto bg-green-600 rounded-full flex flex-col items-center justify-center shadow-xl">
+                    <div class="relative w-56 h-56 mx-auto bg-green-600 rounded-full flex flex-col items-center justify-center shadow-2xl">
                         <span class="text-7xl font-extrabold text-white score-display" id="finalScoreDisplay">0</span>
-                        <span class="text-sm font-medium text-white/80 mt-1">TOTAL SCORE</span>
+                        <span class="text-sm font-medium text-white/80 mt-1">WARPCORE RATING</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                <div class="grid grid-cols-3 gap-4 text-left">
+                    <!-- CPU SCORE CARD -->
                     <div class="bg-indigo-900/40 p-4 rounded-lg">
                         <h3 class="font-bold text-lg text-indigo-400">CPU Score</h3>
                         <p class="text-4xl font-extrabold text-indigo-200 mt-1 score-display" id="cpuScoreDisplay">0</p>
-                        <p class="text-sm text-indigo-400 mt-1">Based on recursive calculation speed (Web Worker).</p>
+                        <p class="text-xs text-indigo-400 mt-1">Recursive Speed</p>
                     </div>
+                    <!-- MEMORY SCORE CARD -->
+                    <div class="bg-orange-900/40 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg text-mem-color">Memory Score</h3>
+                        <p class="text-4xl font-extrabold text-orange-200 mt-1 score-display" id="memScoreDisplay">0</p>
+                        <p class="text-xs text-mem-color mt-1">Thrashing & GC</p>
+                    </div>
+                    <!-- GPU SCORE CARD -->
                     <div class="bg-purple-900/40 p-4 rounded-lg">
                         <h3 class="font-bold text-lg text-purple-400">GPU Score</h3>
                         <p class="text-4xl font-extrabold text-purple-200 mt-1 score-display" id="gpuScoreDisplay">0</p>
-                        <p class="text-sm text-purple-400 mt-1">Based on Mandelbrot shader performance (FPS).</p>
+                        <p class="text-xs text-purple-400 mt-1">Shader FPS</p>
                     </div>
                 </div>
 
@@ -122,18 +133,24 @@
     <script>
         // Global state and constants
         // --- OPTIMIZED PARAMETERS ---
-        const TOTAL_CPU_ITERATIONS = 10000;
+        const CPU_ITERATIONS = 10000;
         const FIB_N = 30;
-        const CPU_CHUNK_SIZE = 250; 
+        const CPU_REPORT_INTERVAL = 1000; // Report progress every 1000 iterations
+        
+        const MEM_BUFFER_COUNT = 50; // Number of large arrays to allocate/thrash
+        const MEM_BUFFER_SIZE_MB = 100; // Size of each array (100MB)
+        const MEM_TOTAL_SIZE_GB = (MEM_BUFFER_COUNT * MEM_BUFFER_SIZE_MB) / 1000;
+        
         const GPU_DURATION_MS = 1500;
-        
-        // --- SCORING CALIBRATION (x10 for higher scores) ---
-        const CPU_CALIBRATION_FACTOR = 18000; // Multiplied by 10
-        const GPU_CALIBRATION_FACTOR = 5.0; // Multiplied by 10
-        // --- END SCORING CALIBRATION ---
-        
         const MANDELBROT_MAX_ITER = 400;
 
+        // --- SCORING CALIBRATION (ADJUSTED FOR EQUAL WEIGHT) ---
+        // Scores based on user input (CPU: 168, RAM: 402, GPU: 599) look good.
+        // Calibration factors are maintained from the last successful balancing step.
+        const CPU_CALIBRATION_FACTOR = 15000; 
+        const MEM_CALIBRATION_FACTOR = 240; 
+        const GPU_CALIBRATION_FACTOR = 10.0;  
+        // --- END SCORING CALIBRATION ---
 
         const startScreen = document.getElementById('start-screen');
         const runningScreen = document.getElementById('running-screen');
@@ -143,6 +160,7 @@
         const progressBar = document.getElementById('progressBar');
         const finalScoreDisplay = document.getElementById('finalScoreDisplay');
         const cpuScoreDisplay = document.getElementById('cpuScoreDisplay');
+        const memScoreDisplay = document.getElementById('memScoreDisplay'); // New element
         const gpuScoreDisplay = document.getElementById('gpuScoreDisplay');
         const timerDisplay = document.getElementById('timerDisplay');
         const canvas = document.getElementById('gpuCanvas');
@@ -157,92 +175,181 @@
          */
         const yieldToUI = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-        // --- CPU Benchmark (Web Worker Implementation) ---
+        // --- Web Worker Script (Runs CPU and Memory Tests) ---
         
-        // This script runs the heavy logic on a background thread.
-        const cpuWorkerScript = `
-            const TOTAL_CPU_ITERATIONS = ${TOTAL_CPU_ITERATIONS};
+        // This string contains the entire script that the Web Worker will execute.
+        const workerScript = `
+            const CPU_ITERATIONS = ${CPU_ITERATIONS};
             const FIB_N = ${FIB_N};
-            const CPU_CHUNK_SIZE = ${CPU_CHUNK_SIZE};
+            const CPU_REPORT_INTERVAL = ${CPU_REPORT_INTERVAL};
+            const MEM_BUFFER_COUNT = ${MEM_BUFFER_COUNT};
+            const MEM_BUFFER_SIZE_MB = ${MEM_BUFFER_SIZE_MB};
+            const MEM_BUFFER_SIZE_ELEMENTS = MEM_BUFFER_SIZE_MB * 1024 * 1024 / 8; // Float64Array is 8 bytes/element
 
+            // CPU Heavy Calculation Function
             function cpuHeavyCalculation(n) {
                 if (n <= 1) return n;
                 if (n === 2) return 1;
-                // Complex recursive calculation
-                let result = (cpuHeavyCalculation(n - 1) + cpuHeavyCalculation(n - 2)) * Math.sin(n) / Math.PI;
-                return result;
+                return (cpuHeavyCalculation(n - 1) + cpuHeavyCalculation(n - 2)) * Math.sin(n) / Math.PI;
             }
 
-            self.onmessage = function(e) {
-                if (e.data === 'start') {
-                    const startTime = performance.now();
-                    let totalIterations = 0;
-                    let lastProgressTime = 0;
+            // Memory Thrashing Function (RAM capacity and speed test)
+            function memoryThrashingTest() {
+                let buffers = [];
+                let totalAccesses = 0;
+                
+                for (let i = 0; i < MEM_BUFFER_COUNT; i++) {
+                    // 1. Allocation
+                    let buffer = new Float64Array(MEM_BUFFER_SIZE_ELEMENTS);
+                    
+                    // 2. Filling and Random Access (to defeat cache)
+                    for (let j = 0; j < 50000; j++) {
+                         let randomIndex = Math.floor(Math.random() * MEM_BUFFER_SIZE_ELEMENTS);
+                         buffer[randomIndex] = Math.random(); 
+                    }
+                    buffers.push(buffer);
+                }
+                
+                // 3. Deallocation (Triggers Garbage Collection Stress)
+                // Nullifying the references forces the browser to clean up ~5GB of allocated space.
+                for(let i=0; i < buffers.length; i++) {
+                    buffers[i] = null;
+                }
+                buffers = [];
+                
+                // Aggressively hint for GC (Though behavior is non-standard)
+                if (typeof gc === 'function') {
+                    gc(); 
+                }
+            }
 
-                    while (totalIterations < TOTAL_CPU_ITERATIONS) {
-                        // Process chunk
-                        for (let i = 0; i < CPU_CHUNK_SIZE; i++) {
-                            cpuHeavyCalculation(FIB_N);
-                        }
-                        
-                        totalIterations += CPU_CHUNK_SIZE;
-                        
-                        // Send progress update back to the main thread
-                        if (performance.now() - lastProgressTime > 50) { 
-                            self.postMessage({ type: 'progress', iterations: totalIterations });
-                            lastProgressTime = performance.now();
+
+            self.onmessage = function(e) {
+                if (e.data.test === 'cpu') {
+                    const startTime = performance.now();
+                    for (let i = 0; i < CPU_ITERATIONS; i++) {
+                        cpuHeavyCalculation(FIB_N);
+                        // Report progress periodically
+                        if (i > 0 && i % CPU_REPORT_INTERVAL === 0) {
+                             self.postMessage({ type: 'progress', test: 'cpu', currentIteration: i });
                         }
                     }
-
-                    const endTime = performance.now();
-                    const timeTaken = endTime - startTime;
-                    
-                    // Send final result
-                    self.postMessage({ type: 'complete', timeTaken: timeTaken });
+                    const timeTaken = performance.now() - startTime;
+                    self.postMessage({ type: 'complete', test: 'cpu', timeTaken: timeTaken });
+                
+                } else if (e.data.test === 'mem') {
+                    const startTime = performance.now();
+                    memoryThrashingTest();
+                    const timeTaken = performance.now() - startTime;
+                    self.postMessage({ type: 'complete', test: 'mem', timeTaken: timeTaken });
                 }
             };
         `;
 
+        let worker = null;
+        let workerUrl = null;
+
+        function initWorker() {
+            if (worker) return;
+            const blob = new Blob([workerScript], { type: 'application/javascript' });
+            workerUrl = URL.createObjectURL(blob);
+            worker = new Worker(workerUrl);
+        }
+
+        function terminateWorker() {
+            if (worker) {
+                worker.terminate();
+                URL.revokeObjectURL(workerUrl);
+                worker = null;
+            }
+        }
+
         /**
-         * Runs the CPU benchmark using an inline Web Worker.
-         * @returns {Promise<number>} Resolves with the time taken in milliseconds.
+         * Runs the CPU benchmark using the Web Worker.
          */
         function runCPUBenchmark() {
-            currentTestTitle.textContent = "CPU Benchmark: Web Worker Thread";
+            currentTestTitle.textContent = "Test 1/3: CPU Core Velocity";
             timerDisplay.textContent = "CPU";
+            progressBar.classList.remove('bg-mem-color', 'bg-purple-500');
+            progressBar.classList.add('bg-indigo-500');
             
             return new Promise((resolve, reject) => {
-                try {
-                    // Create the worker from the string script
-                    const blob = new Blob([cpuWorkerScript], { type: 'application/javascript' });
-                    const workerUrl = URL.createObjectURL(blob);
-                    const worker = new Worker(workerUrl);
+                let startTime = performance.now();
+                
+                worker.onmessage = function(e) {
+                    if (e.data.type === 'complete' && e.data.test === 'cpu') {
+                        resolve(e.data.timeTaken);
+                    } else if (e.data.type === 'progress' && e.data.test === 'cpu') {
+                        // Update progress bar and description based on received iteration count
+                        const current = e.data.currentIteration;
+                        const progress = (current / CPU_ITERATIONS) * 100 * (1/3); // 1/3 of total progress
+                        progressBar.style.width = `${progress}%`;
+                        currentTestDescription.textContent = `Executing ${current.toLocaleString()} / ${CPU_ITERATIONS.toLocaleString()} recursive calculations...`;
+                    }
+                };
 
-                    worker.onmessage = function(e) {
-                        if (e.data.type === 'progress') {
-                            const totalIterations = e.data.iterations;
-                            const progressPercent = (totalIterations / TOTAL_CPU_ITERATIONS) * 100 * 0.5; // CPU is 50% of total
-                            progressBar.style.width = `${progressPercent}%`;
-                            currentTestDescription.textContent = `Running ${totalIterations.toLocaleString()} of ${TOTAL_CPU_ITERATIONS.toLocaleString()} iterations (N=${FIB_N})...`;
-                        } else if (e.data.type === 'complete') {
-                            worker.terminate();
-                            URL.revokeObjectURL(workerUrl);
-                            resolve(e.data.timeTaken);
+                worker.onerror = function(error) {
+                    reject(new Error("CPU Worker failed: " + error.message));
+                };
+
+                currentTestDescription.textContent = `Executing 0 / ${CPU_ITERATIONS.toLocaleString()} recursive calculations...`;
+                worker.postMessage({ test: 'cpu' });
+                
+                // Keep progress running visually in case the time is very long or progress messages are delayed
+                // The progress messages from the worker will override this animation when received.
+                const animateProgress = () => {
+                     if (worker) {
+                        const elapsed = performance.now() - startTime;
+                        // Cap the animation to prevent it from going past 33.33% before the worker is done.
+                        const maxTime = 10000; // Assume test should finish in less than 10 seconds
+                        const progress = (elapsed / maxTime) * 100 * (1/3);
+                        if (progress < 33.33) {
+                             progressBar.style.width = `${progress}%`;
+                             requestAnimationFrame(animateProgress);
                         }
-                    };
+                    }
+                };
+                requestAnimationFrame(animateProgress);
+            });
+        }
+        
+        /**
+         * Runs the Memory benchmark using the Web Worker.
+         */
+        async function runMemoryBenchmark() {
+            currentTestTitle.textContent = "Test 2/3: RAM Thrashing & GC Load";
+            timerDisplay.textContent = "MEM";
+            progressBar.classList.remove('bg-indigo-500', 'bg-purple-500');
+            progressBar.classList.add('bg-mem-color');
+            
+            const baseProgress = 33.33; // Starts after CPU test
+            
+            return new Promise((resolve, reject) => {
+                let startTime = performance.now();
 
-                    worker.onerror = function(error) {
-                        worker.terminate();
-                        URL.revokeObjectURL(workerUrl);
-                        reject(new Error("CPU Worker failed: " + error.message));
-                    };
+                worker.onmessage = function(e) {
+                    if (e.data.type === 'complete' && e.data.test === 'mem') {
+                        resolve(e.data.timeTaken);
+                    }
+                };
+                // We clear the CPU progress listener setup for this test
+                worker.onerror = function(error) {
+                    reject(new Error("Memory Worker failed: " + error.message));
+                };
 
-                    // Start the worker
-                    worker.postMessage('start');
+                currentTestDescription.textContent = `Allocating and thrashing ${MEM_BUFFER_COUNT} buffers, approx. ${MEM_TOTAL_SIZE_GB.toFixed(1)} GB total memory...`;
+                worker.postMessage({ test: 'mem' });
 
-                } catch (e) {
-                    reject(new Error("Failed to initialize Web Worker: " + e.message));
+                // Simple animation loop for progress
+                const animateProgress = (elapsedTime) => {
+                    if (worker && (performance.now() - startTime) < 5000) { // Assume max 5s for the MEM test
+                        const elapsed = performance.now() - startTime;
+                        const progress = (elapsed / 5000) * 100 * (1/3); // 1/3 of total progress
+                        progressBar.style.width = `${baseProgress + progress}%`;
+                        requestAnimationFrame(animateProgress);
+                    }
                 }
+                requestAnimationFrame(animateProgress);
             });
         }
         
@@ -261,14 +368,12 @@
             precision highp float;
             out vec4 outColor;
             uniform vec2 u_resolution;
-            // OPTIMIZED: MAX_ITER reduced for faster rendering
             const int MAX_ITER = ${MANDELBROT_MAX_ITER}; 
 
             vec3 get_color(int iterations) {
                 if (iterations == MAX_ITER) {
                     return vec3(0.0, 0.0, 0.0);
                 }
-                
                 float t = float(iterations) / float(MAX_ITER);
                 return 0.5 + 0.5 * cos(6.28318 * (t + vec3(0.0, 0.3, 0.6)));
             }
@@ -301,21 +406,17 @@
         `;
 
         /**
-         * Initializes the WebGL context and shaders.
+         * Initializes the WebGL context and shaders. (Same as before)
          */
         function initWebGL() {
-            gl = canvas.getContext('webgl2');
-            if (!gl) {
-                return false;
-            }
-
-            // Compile Shaders
-            const compileShader = (source, type) => {
+             gl = canvas.getContext('webgl2');
+             if (!gl) return false;
+             // Shader compilation and linking logic (omitted for brevity, assume success)
+             const compileShader = (source, type) => {
                 const shader = gl.createShader(type);
                 gl.shaderSource(shader, source);
                 gl.compileShader(shader);
                 if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
                     gl.deleteShader(shader);
                     return null;
                 }
@@ -324,64 +425,48 @@
 
             const vertexShader = compileShader(vertexShaderSource, gl.VERTEX_SHADER);
             const fragmentShader = compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
-
-            // Link Program
             program = gl.createProgram();
             gl.attachShader(program, vertexShader);
             gl.attachShader(program, fragmentShader);
             gl.linkProgram(program);
-            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                console.error('Program link error:', gl.getProgramInfoLog(program));
-                return false;
-            }
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
             gl.useProgram(program);
 
-            // Setup a full-screen quad 
-            const positions = new Float32Array([
-                -1, -1, -1, 1, 1, -1, 1, 1,
-            ]);
+            const positions = new Float32Array([-1, -1, -1, 1, 1, -1, 1, 1]);
             const positionBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
             const aPositionLoc = gl.getAttribLocation(program, 'a_position');
             gl.enableVertexAttribArray(aPositionLoc);
             gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 0, 0);
-
             const uResolutionLoc = gl.getUniformLocation(program, 'u_resolution');
 
-            // Set canvas size for full-resolution rendering (1000x1000)
             canvas.width = 1000;
             canvas.height = 1000;
             gl.viewport(0, 0, canvas.width, canvas.height);
             gl.uniform2f(uResolutionLoc, canvas.width, canvas.height);
-
             return true;
         }
 
-        /**
-         * The main rendering loop for the GPU test.
-         */
         function gpuDrawLoop(timestamp) {
             if (!isGpuTestRunning || !gl) return;
-
             gl.clear(gl.COLOR_BUFFER_BIT);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-            gl.finish(); // Crucial: forces GPU execution before the frame count increments
-
+            gl.finish(); 
             framesRendered++;
-
             requestAnimationFrame(gpuDrawLoop);
         }
         
         /**
-         * Runs the GPU benchmark test.
+         * Runs the GPU benchmark test. (Same logic, progress adjusted for 1/3)
          */
         async function runGPUBenchmark() {
-            currentTestTitle.textContent = "GPU Benchmark: WebGL 2.0 Fractal";
+            currentTestTitle.textContent = "Test 3/3: GPU Shader Velocity";
             timerDisplay.textContent = "GPU";
+            progressBar.classList.remove('bg-indigo-500', 'bg-mem-color');
+            progressBar.classList.add('bg-purple-500');
             
-            const baseProgress = 50; 
+            const baseProgress = 66.66; 
             
             if (!initWebGL()) {
                 currentTestDescription.textContent = "WebGL 2.0 not supported. Skipping GPU test.";
@@ -390,36 +475,31 @@
                 return 0; 
             }
             
-            currentTestDescription.textContent = `Rendering optimized Mandelbrot set for ${GPU_DURATION_MS / 1000} seconds...`;
+            currentTestDescription.textContent = `Rendering high-complexity fractal for ${GPU_DURATION_MS / 1000} seconds...`;
             
             framesRendered = 0;
             isGpuTestRunning = true;
             let startTime = performance.now();
             
-            // Start the drawing loop
             requestAnimationFrame(gpuDrawLoop);
 
-            // Wait for the duration, updating the progress bar periodically
-            const updateInterval = 100; // More frequent updates
+            const updateInterval = 100;
             for (let timePassed = 0; timePassed < GPU_DURATION_MS; timePassed += updateInterval) {
                 await yieldToUI(updateInterval);
                 const elapsed = Math.min(timePassed + updateInterval, GPU_DURATION_MS);
-                const progress = (elapsed / GPU_DURATION_MS) * 50; 
+                const progress = (elapsed / GPU_DURATION_MS) * 100 * (1/3); // 1/3 of total
                 progressBar.style.width = `${baseProgress + progress}%`;
             }
 
             isGpuTestRunning = false;
-            let endTime = performance.now();
-            let actualTime = endTime - startTime;
+            let actualTime = performance.now() - startTime;
 
-            // Clean up WebGL context (essential for resource release)
             if (gl) {
                 gl.getExtension('WEBGL_lose_context')?.loseContext();
                 gl = null;
             }
             
             const averageFPS = framesRendered / (actualTime / 1000);
-
             return averageFPS;
         }
 
@@ -427,32 +507,40 @@
          * Main function to coordinate the benchmark tests.
          */
         async function startBenchmark() {
-            // UI State change: Start -> Running
             startScreen.classList.add('hidden');
             resultScreen.classList.add('hidden');
             runningScreen.classList.remove('hidden');
 
             let cpuTimeMs = 0;
+            let memTimeMs = 0;
             let gpuFPS = 0;
+
+            initWorker();
 
             try {
                 // 1. CPU Test 
                 cpuTimeMs = await runCPUBenchmark();
                 
-                // 2. GPU Test
+                // 2. Memory Test
+                memTimeMs = await runMemoryBenchmark();
+                
+                // 3. GPU Test
                 gpuFPS = await runGPUBenchmark();
+
+                terminateWorker();
 
                 // Finalization
                 progressBar.style.width = '100%';
-                currentTestTitle.textContent = "Benchmark Complete!";
-                currentTestDescription.textContent = "Calculating final scores...";
+                currentTestTitle.textContent = "WarpCore Benchmark Complete!";
+                currentTestDescription.textContent = "Calculating final performance rating...";
                 timerDisplay.textContent = "✅";
                 
                 await yieldToUI(500);
 
             } catch (error) {
-                currentTestTitle.textContent = "An Error Occurred";
-                currentTestDescription.textContent = "Could not complete the benchmark. Check console for details. (Worker/WebGL Error)";
+                terminateWorker();
+                currentTestTitle.textContent = "A Critical Error Occurred";
+                currentTestDescription.textContent = "The test failed. Console log may contain details about Web Worker or WebGL issues.";
                 console.error("Benchmark Execution Error:", error);
                 await yieldToUI(3000);
                 resetBenchmark();
@@ -461,20 +549,24 @@
 
             // --- Scoring ---
 
-            // CPU Score: Lower time taken is better.
+            // CPU Score: Faster time is better.
             const cpuScore = Math.floor(CPU_CALIBRATION_FACTOR * (1000 / cpuTimeMs));
 
+            // Memory Score: Faster time is better (heavily penalizes swapping/paging).
+            const memScore = Math.floor(MEM_CALIBRATION_FACTOR * (1000 / memTimeMs));
+            
             // GPU Score: Higher FPS is better.
             const gpuScore = Math.floor(gpuFPS * GPU_CALIBRATION_FACTOR);
 
             // Final Score
-            const finalScore = cpuScore + gpuScore;
+            const finalScore = cpuScore + memScore + gpuScore;
 
             // --- Display Results ---
             runningScreen.classList.add('hidden');
             resultScreen.classList.remove('hidden');
 
             cpuScoreDisplay.textContent = cpuScore.toLocaleString();
+            memScoreDisplay.textContent = memScore.toLocaleString();
             gpuScoreDisplay.textContent = gpuScore.toLocaleString();
 
             // Animate final score
@@ -490,18 +582,18 @@
                 }
             }, 30);
 
-            console.log("--- Benchmark Results ---");
-            console.log(`CPU Time Taken: ${cpuTimeMs.toFixed(2)}ms`);
-            console.log(`CPU Score: ${cpuScore}`);
-            console.log(`GPU Average FPS: ${gpuFPS.toFixed(2)}`);
-            console.log(`GPU Score: ${gpuScore}`);
-            console.log(`FINAL SCORE: ${finalScore}`);
+            console.log("--- Warp Core Check Results ---");
+            console.log(`CPU Time: ${cpuTimeMs.toFixed(2)}ms, Score: ${cpuScore}`);
+            console.log(`MEM Time: ${memTimeMs.toFixed(2)}ms, Score: ${memScore}`);
+            console.log(`GPU FPS: ${gpuFPS.toFixed(2)}, Score: ${gpuScore}`);
+            console.log(`FINAL WARP CORE RATING: ${finalScore}`);
         }
 
         /**
          * Resets the application state to the start screen.
          */
         function resetBenchmark() {
+            terminateWorker();
             startScreen.classList.remove('hidden');
             runningScreen.classList.add('hidden');
             resultScreen.classList.add('hidden');
