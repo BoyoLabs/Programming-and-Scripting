@@ -1,6 +1,6 @@
-# webApps
+# Programming and Scripting
 
-This repo is all about my webapps. Single Page Apps (SPAs) are the focus.
+This repo is dedicated to my single page web apps, programming and other scripting.
 
 ---
 
