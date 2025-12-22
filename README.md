@@ -6,9 +6,15 @@ This repo is dedicated to my single page web apps, programming and other scripti
 
 ## APPS LIST
 
+### SkeletonSlicer.html (WIP)
+
+* a web based 3D slicer, currently working on it, definitly not done yet.
+* github.io link: https://boyolabs.github.io/main-dev/SkeletonSlicer.html
+
 ### WebAmp.html
 
 * a retro audio visualizer that is like winamp or windows media player of yore
+* github.io link: https://boyolabs.github.io/main-dev/WebAmp.html
 
 ### SAK.bat
 
@@ -29,7 +35,9 @@ This repo is dedicated to my single page web apps, programming and other scripti
 ### PromptForge.html
 
 * was going to be a browser based markdown editor, but I didnt really like how it turned out so I abandoned it.
+* github.io link: https://boyolabs.github.io/main-dev/PromptForge.html
 
 ### WarpCore.html
 
 * a very inaccurate benchmarking tool.
+* github.io link: https://boyolabs.github.io/main-dev/WarpCore.html
