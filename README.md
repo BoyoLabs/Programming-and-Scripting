@@ -4,7 +4,7 @@ This repo is dedicated to my single page web apps, programming and other scripti
 
 ---
 
-## APPS LIST|
+## APPS LIST
 
 ### WebAmp.html
 
